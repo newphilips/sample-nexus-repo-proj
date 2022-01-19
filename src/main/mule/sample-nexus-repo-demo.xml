@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b2fc94f4-a70b-4abc-a23d-eab4ece3f757" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="bf0e2876-e421-4b60-b444-22302cc2ac1a" basePath="${request.base-path}" >
+		<http:request-connection host="${request.host}" />
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="83545a53-4fe4-4c11-8380-24a955e6db01" file="config.yaml" />
+	<flow name="sample-nexus-repo-demoFlow" doc:id="8014dd4d-81f1-4c83-8ed5-2f06e1314e90" >
+		<http:listener doc:name="Listener" doc:id="474f2127-eacc-4771-bb8b-017c4113e0a9" config-ref="HTTP_Listener_config" path="${http.endpoint}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="35c1441f-fab1-4a5f-8027-d8ba55e328ca" message="sample-nexus-repo-demoFlow started with country: #[attributes.uriParams.'country'] and city: #[attributes.uriParams.'city']"/>
+		<http:request method="GET" doc:name="Request" doc:id="d74c5bd2-6df7-4498-8715-ca35e349ceb8" config-ref="HTTP_Request_configuration" path="${request.path}">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"country" : attributes.uriParams.'country',
+	"city": attributes.uriParams.'city'
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="c8d1181b-1c53-497b-bb92-8e1156c1afbd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="51d6027a-f2b1-4f75-9643-e9d2b5e1ee3e" message="payload returned is: #[payload]"/>
+	</flow>
+</mule>

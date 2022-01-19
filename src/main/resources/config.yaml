@@ -1,0 +1,8 @@
+http:
+  port: "8081"
+  endpoint: "/timezone/{country}/{city}"
+ 
+request:
+  host: "worldtimeapi.org"
+  base-path: "/api/timezone"
+  path: "/{country}/{city}"
